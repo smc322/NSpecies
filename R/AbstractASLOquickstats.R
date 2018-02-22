@@ -6,13 +6,31 @@ lagos<-lagos_load(version="1.087.1")
 locus<-lagos$locus
 epinut<-lagos$epi_nutr
 
-chla<-lagos$epi_nutr[,c(2,7,92)]
-chla.80<-na.omit(chla[chla$sampleyear>1979,])
+#summarize N data
 
-annualmed = aggregate(chla.80$chla, chla.80[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
-lakemed = aggregate(annualmed$x, by=list(annualmed$lagoslakeid), FUN=function(x) c(median=median(x)))
-names(lakemed)<-c("lagoslakeid", "median_chla")
+nitrogen<-lagos$epi_nutr[,c(2,12,14,19,92,93)]
+nitrogen.80<-nitrogen[nitrogen$sampleyear>1979,]
+nitrogen.80.ja<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8,]
+nitrogen.80.jas<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8 | nitrogen.80$samplemonth == 9,]
 
+tn<-na.omit(nitrogen.80.jas[,c(1,4:5)])
+no3<-na.omit(nitrogen.80.jas[,c(1,3,5)])
+nh4<-na.omit(nitrogen.80.jas[,c(1,2,5)])
+
+
+annualmed.tn = aggregate(tn$tn, tn[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
+lakemed.tn = aggregate(annualmed.tn$x, by=list(annualmed.tn$lagoslakeid), FUN=function(x) c(median=median(x)))
+names(lakemed.tn)<-c("lagoslakeid", "median_tn")
+
+annualmed.no3 = aggregate(no3$no2no3, no3[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
+lakemed.no3 = aggregate(annualmed.no3$x, by=list(annualmed.no3$lagoslakeid), FUN=function(x) c(median=median(x)))
+names(lakemed.no3)<-c("lagoslakeid", "median_no3")
+
+annualmed.nh4 = aggregate(nh4$nh4, nh4[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
+lakemed.nh4 = aggregate(annualmed.nh4$x, by=list(annualmed.nh4$lagoslakeid), FUN=function(x) c(median=median(x)))
+names(lakemed.nh4)<-c("lagoslakeid", "median_nh4")
+
+#geopredictors
 
 hu8.chag<-lagos$hu8.chag
 hu8.chag.rel<-hu8.chag[,c(1,4, 20, 68, 100)]
@@ -38,3 +56,10 @@ lakewsa<-merge(area, wsarea, by="lagoslakeid", all.x=T, all.y=T)
 areadepth<-merge(lakewsa, maxd, by="lagoslakeid", all.x=T, all.y=T)
 areadepthconn<-merge(areadepth, connclass, by="lagoslakeid", all.x=T, all.y=T)
 areadepthconn$la_wa_ratio<-areadepthconn$lake_area_ha/areadepthconn$iws_ha
+
+
+#combine predictors to merge w n
+hu.8id<-locus[,c(1,13)]
+chag.id<-merge(hu8.chag.rel, hu.8id, by="hu8_zoneid", all.x=T, all.y=T)
+
+chag.lulc<-merge(chag.id, iws.lulc.rel.keep.nona, by="lagoslakeid", all.x=T, all.y=T)
