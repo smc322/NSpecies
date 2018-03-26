@@ -63,3 +63,28 @@ hu.8id<-locus[,c(1,13)]
 chag.id<-merge(hu8.chag.rel, hu.8id, by="hu8_zoneid", all.x=T, all.y=T)
 
 chag.lulc<-merge(chag.id, iws.lulc.rel.keep.nona, by="lagoslakeid", all.x=T, all.y=T)
+
+chag.lulc.lake<-merge(chag.lulc, areadepthconn, by="lagoslakeid", all.x=T, all.y=T)
+
+nh4.covars<-na.omit(merge(chag.lulc.lake, lakemed.nh4, by="lagoslakeid", all.x=F, all.y=T))
+
+no3.covars<-na.omit(merge(chag.lulc.lake, lakemed.no3, by="lagoslakeid", all.x=F, all.y=T))
+
+tn.covars<-na.omit(merge(chag.lulc.lake, lakemed.tn, by="lagoslakeid", all.x=F, all.y=T))
+
+#save files of each N species with covars
+
+saveRDS(nh4.covars, file="Data/NH4_Covariates_feb2018.rds")
+saveRDS(no3.covars, file="Data/NO3_Covariates_feb2018.rds")
+saveRDS(tn.covars, file="Data/TN_Covariates_feb2018.rds")
+
+
+#run a quick random forest for each to get predictability and best predictors to make vague comments in abstract
+
+library(randomForest)
+
+nh4rf<-randomForest(median_nh4~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_dep_totaln_2000_mean+hu8_runoff_mean+urban+rowcrop+pasture+forest+wetland+openh20+lake_area_ha+maxdepth+la_wa_ratio, data=nh4.covars)
+
+no3rf<-randomForest(median_no3~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_dep_totaln_2000_mean+hu8_runoff_mean+urban+rowcrop+pasture+forest+wetland+openh20+lake_area_ha+maxdepth+la_wa_ratio, data=no3.covars)
+
+tnrf<-randomForest(median_tn~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_dep_totaln_2000_mean+hu8_runoff_mean+urban+rowcrop+pasture+forest+wetland+openh20+lake_area_ha+maxdepth+la_wa_ratio, data=tn.covars)
