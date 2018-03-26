@@ -4,11 +4,11 @@ library(LAGOS)
 lagos<-lagos_load(version="1.087.1")
 
 locus<-lagos$locus
-epinut<-lagos$epi_nutr
+epinut<-lagos$epi.nutr
 
 #summarize N data
 
-nitrogen<-lagos$epi_nutr[,c(2,12,14,19,92,93)]
+nitrogen<-lagos$epi.nutr[,c(2,12,14,19,93,94)]
 nitrogen.80<-nitrogen[nitrogen$sampleyear>1979,]
 nitrogen.80.ja<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8,]
 nitrogen.80.jas<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8 | nitrogen.80$samplemonth == 9,]
