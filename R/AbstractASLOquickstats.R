@@ -4,18 +4,25 @@ library(LAGOS)
 lagos<-lagos_load(version="1.087.1")
 
 locus<-lagos$locus
-epinut<-lagos$epi.nutr
+# laptop version use 
+#epinut<-lagos$epi.nutr
+#desktop use
+epinut<-lagos$epi_nutr
 
 #summarize N data
 
-nitrogen<-lagos$epi.nutr[,c(2,12,14,19,93,94)]
+#laptop
+#nitrogen<-lagos$epi.nutr[,c(2,12,14,19,93,94)]
+#deskotp
+nitrogen<-lagos$epi_nutr[,c(2,12,14,18,19,92,93)]
 nitrogen.80<-nitrogen[nitrogen$sampleyear>1979,]
 nitrogen.80.ja<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8,]
 nitrogen.80.jas<-nitrogen.80[nitrogen.80$samplemonth == 7 | nitrogen.80$samplemonth == 8 | nitrogen.80$samplemonth == 9,]
 
-tn<-na.omit(nitrogen.80.jas[,c(1,4:5)])
-no3<-na.omit(nitrogen.80.jas[,c(1,3,5)])
-nh4<-na.omit(nitrogen.80.jas[,c(1,2,5)])
+tn<-na.omit(nitrogen.80.jas[,c(1,5,6)])
+no3<-na.omit(nitrogen.80.jas[,c(1,3,6)])
+nh4<-na.omit(nitrogen.80.jas[,c(1,2,6)])
+tkn<-na.omit(nitrogen.80.jas[,c(1,4,6)])
 
 
 annualmed.tn = aggregate(tn$tn, tn[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
@@ -29,6 +36,10 @@ names(lakemed.no3)<-c("lagoslakeid", "median_no3")
 annualmed.nh4 = aggregate(nh4$nh4, nh4[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
 lakemed.nh4 = aggregate(annualmed.nh4$x, by=list(annualmed.nh4$lagoslakeid), FUN=function(x) c(median=median(x)))
 names(lakemed.nh4)<-c("lagoslakeid", "median_nh4")
+
+annualmed.tkn = aggregate(tkn$tkn, tkn[,c("lagoslakeid", "sampleyear")], FUN=function(x) c(median=median(x)))
+lakemed.tkn = aggregate(annualmed.tkn$x, by=list(annualmed.tkn$lagoslakeid), FUN=function(x) c(median=median(x)))
+names(lakemed.tkn)<-c("lagoslakeid", "median_tkn")
 
 #geopredictors
 
@@ -72,12 +83,14 @@ no3.covars<-na.omit(merge(chag.lulc.lake, lakemed.no3, by="lagoslakeid", all.x=F
 
 tn.covars<-na.omit(merge(chag.lulc.lake, lakemed.tn, by="lagoslakeid", all.x=F, all.y=T))
 
+tkn.covars<-na.omit(merge(chag.lulc.lake, lakemed.tkn, by="lagoslakeid", all.x=F, all.y=T))
+
 #save files of each N species with covars
 
 saveRDS(nh4.covars, file="Data/NH4_Covariates_feb2018.rds")
 saveRDS(no3.covars, file="Data/NO3_Covariates_feb2018.rds")
 saveRDS(tn.covars, file="Data/TN_Covariates_feb2018.rds")
-
+saveRDS(tkn.covars, file="Data/TKN_Covariates_feb2018rds")
 
 #run a quick random forest for each to get predictability and best predictors to make vague comments in abstract
 
@@ -88,3 +101,44 @@ nh4rf<-randomForest(median_nh4~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_
 no3rf<-randomForest(median_no3~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_dep_totaln_2000_mean+hu8_runoff_mean+urban+rowcrop+pasture+forest+wetland+openh20+lake_area_ha+maxdepth+la_wa_ratio, data=no3.covars)
 
 tnrf<-randomForest(median_tn~hu8_baseflowindex_mean+hu8_dep_no3_2000_mean+hu8_dep_totaln_2000_mean+hu8_runoff_mean+urban+rowcrop+pasture+forest+wetland+openh20+lake_area_ha+maxdepth+la_wa_ratio, data=tn.covars)
+
+
+##make maps of each N species location 
+
+library(maps)
+library(mapdata)
+
+latlong<-lagos$locus[,c(1,4,5)]
+
+nh4.map<-merge(nh4.covars, latlong, by="lagoslakeid", all.x=T, all.y=F)
+
+map("worldHires", "Canada", xlim=c(min(nh4.map$nhd_long, na.rm=TRUE)-1,max(nh4.map$nhd_long, na.rm=TRUE)+1), ylim=c(min(nh4.map$nhd_lat, na.rm=TRUE)-1,max(nh4.map$nhd_lat, na.rm=TRUE)+1), fill=TRUE, col="khaki", lwd=2, bg="lightblue1")
+map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
+map("state", boundary = FALSE, add = TRUE)
+points(nh4.map$nhd_long, nh4.map$nhd_lat, pch=19, col="black", cex=0.5)  
+text(-78, 47, "NH4 - summer data lakes", cex=1.5)
+
+
+no3.map<-merge(no3.covars, latlong, by="lagoslakeid", all.x=T, all.y=F)
+
+map("worldHires", "Canada", xlim=c(min(no3.map$nhd_long, na.rm=TRUE)-1,max(no3.map$nhd_long, na.rm=TRUE)+1), ylim=c(min(no3.map$nhd_lat, na.rm=TRUE)-1,max(no3.map$nhd_lat, na.rm=TRUE)+1), fill=TRUE, col="khaki", lwd=2, bg="lightblue1")
+map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
+map("state", boundary = FALSE, add = TRUE)
+points(no3.map$nhd_long, no3.map$nhd_lat, pch=19, col="black", cex=0.5)  
+text(-78, 47, "NO3 - summer data lakes", cex=1.5)
+
+tn.map<-merge(tn.covars, latlong, by="lagoslakeid", all.x=T, all.y=F)
+
+map("worldHires", "Canada", xlim=c(min(tn.map$nhd_long, na.rm=TRUE)-1,max(tn.map$nhd_long, na.rm=TRUE)+1), ylim=c(min(tn.map$nhd_lat, na.rm=TRUE)-1,max(tn.map$nhd_lat, na.rm=TRUE)+1), fill=TRUE, col="khaki", lwd=2, bg="lightblue1")
+map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
+map("state", boundary = FALSE, add = TRUE)
+points(tn.map$nhd_long, tn.map$nhd_lat, pch=19, col="black", cex=0.5)  
+text(-78, 47, "TN - summer data lakes", cex=1.5)
+
+tkn.map<-merge(tkn.covars, latlong, by="lagoslakeid", all.x=T, all.y=F)
+
+map("worldHires", "Canada", xlim=c(min(tkn.map$nhd_long, na.rm=TRUE)-1,max(tkn.map$nhd_long, na.rm=TRUE)+1), ylim=c(min(tkn.map$nhd_lat, na.rm=TRUE)-1,max(tkn.map$nhd_lat, na.rm=TRUE)+1), fill=TRUE, col="khaki", lwd=2, bg="lightblue1")
+map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
+map("state", boundary = FALSE, add = TRUE)
+points(tkn.map$nhd_long, tkn.map$nhd_lat, pch=19, col="black", cex=0.5)  
+text(-78, 47, "TKN - summer data lakes", cex=1.5)
