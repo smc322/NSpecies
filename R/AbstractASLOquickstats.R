@@ -142,3 +142,33 @@ map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
 map("state", boundary = FALSE, add = TRUE)
 points(tkn.map$nhd_long, tkn.map$nhd_lat, pch=19, col="black", cex=0.5)  
 text(-78, 47, "TKN - summer data lakes", cex=1.5)
+
+
+###look at detection limit data and distribution for different N species
+
+dls<-lagos$epi_nutr[,c(2,12,14,18,19, 63, 65, 70, 71 ,92,93)]
+
+
+dl.80<-dls[dls$sampleyear>1979,]
+dl.80.jas<-dl.80[dl.80$samplemonth == 7 | dl.80$samplemonth == 8 | dl.80$samplemonth == 9,]
+
+tndl<-na.omit(dl.80.jas[,c(1,5,9, 10)])
+no3dl<-na.omit(dl.80.jas[,c(1,3,7, 10)])
+nh4dl<-na.omit(dl.80.jas[,c(1,2,6,10)])
+tkndl<-na.omit(dl.80.jas[,c(1,4,8,10)])
+
+
+smallnh4dl<-nh4dl[nh4dl$nh4_detectionlimit<5,]
+
+library(maps)
+library(mapdata)
+
+latlong<-lagos$locus[,c(1,4,5)]
+
+nh4.map<-merge(smallnh4dl, latlong, by="lagoslakeid", all.x=T, all.y=F)
+
+map("worldHires", "Canada", xlim=c(min(nh4.map$nhd_long, na.rm=TRUE)-1,max(nh4.map$nhd_long, na.rm=TRUE)+1), ylim=c(min(nh4.map$nhd_lat, na.rm=TRUE)-1,max(nh4.map$nhd_lat, na.rm=TRUE)+1), fill=TRUE, col="khaki", lwd=2, bg="lightblue1")
+map("worldHires", "USa", add=TRUE,  fill=TRUE, col="khaki", lwd=2)
+map("state", boundary = FALSE, add = TRUE)
+points(nh4.map$nhd_long, nh4.map$nhd_lat, pch=19, col="black", cex=0.5)  
+text(-78, 47, "NH4 - summer data lakes", cex=1.5)
