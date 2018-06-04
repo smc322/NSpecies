@@ -20,8 +20,12 @@ data.tn<-lagos$epi_nutr[,c(2,12,14,19, 63, 65, 71 ,92,93)]
 data.tkn<-lagos$epi_nutr[,c(2,12,14,18, 63, 65, 70 ,92,93)]
 
 tn.complete<-data.tn[!with(data.tn, is.na(nh4)|is.na(no2no3)|is.na(tn)),]
+tn.complete$tkn=NA
+tn.complete$tkn_detectionlimit=NA
 
 tkn.complete<-data.tkn[!with(data.tkn, is.na(nh4)|is.na(no2no3)|is.na(tkn)),]
+tkn.complete$tn=NA
+tkn.complete$tn_detectionlimit=NA
 
 tnortkn<-rbind(tn.complete, tkn.complete)
 
@@ -80,3 +84,12 @@ names(chag.lulc.lake) <- c("lagoslakeid","hu8_baseflow",   "hu8_no3depo",    "hu
 data.n.geo<-merge(nrdl4, chag.lulc.lake, by="lagoslakeid", all.x=T, all.y=F)
 setwd("/Users/SarahiMac/Documents/LocalGitProjects/NSpecies/NSpecies/Data")
 write.csv(data.n.geo, file="LagosNSpeciesData_08April2018.csv")
+
+#add latlong
+ll.l<-lagos$locus[,c(1,4,5)]
+data.n.geo.ll<-merge(data.n.geo, ll.l, by="lagoslakeid", all.x=T, all.y=F)
+setwd("~/Dropbox/Sarah_Work/Manuscripts/2018_NSpecies/Data")
+write.csv(data.n.geo.ll, file="LagosNSpeciesData_latlong_04June2018.csv")
+
+
+
