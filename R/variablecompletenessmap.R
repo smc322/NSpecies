@@ -95,3 +95,14 @@ text(-78, 47, "N Species", cex=1.5)
 
 ###lakes that Erin et al actually used in analysis: 
 load("Data/newdata_lakeid.RData")
+
+analysis<-data.frame(lakeid)
+names(analysis)<-"lagoslakeid"
+
+a.data<-merge(analysis, ncords, by="lagoslakeid", all.x=T, all.y=F)
+points(a.data$nhd_long, a.data$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(255, 255, 204, 150, max=255), cex=0.7)
+
+
+programs<-lagos$epi_nutr[,c(2:4)]
+
+a.dat.prog<-merge(a.data, programs, by="lagoslakeid", all.x=T, all.y=F)
