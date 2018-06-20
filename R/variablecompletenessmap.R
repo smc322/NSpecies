@@ -12,7 +12,7 @@ locus<-lagos$locus
 #desktop use
 epinut<-lagos$epi_nutr
 
-data.n<-lagos$epi_nutr[,c(2,12,14, 18, 19, 92,93)]
+data.n<-lagos$epi.nutr[,c(2,12,14, 18, 19, 92,93)]
 cords<-locus[,c(1,4,5)]
 
 medians<- data.n %>% group_by(lagoslakeid, sampleyear) %>% summarise(tnmed=median(tn, na.rm=T), tknmed=median(tkn, na.rm=T), no3med=median(no2no3, na.rm=T), nh4med=median(nh4, na.rm=T))
@@ -88,7 +88,49 @@ points(double$nhd_long, double$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(161,
 points(triple$nhd_long, triple$nhd_lat, pch=21, col="black", lwd=.5,  bg=rgb(65,182,196,150, max=255), cex=0.7)
 points(quad$nhd_long, quad$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(34,94,168,150, max=255), cex=0.7)
 
+##inorganics map
+pdf("Figures/InorganicNMap.pdf", width=13, height=8)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = TRUE, col="white", fg="grey30", lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(nh4$nhd_long, nh4$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(no3$nhd_long, no3$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(nh4no3$nhd_long, nh4no3$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+dev.off()
 
+##totals map
+pdf("Figures/TotalNMap.pdf", width=13, height=8)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = TRUE, col="white", fg="grey30", lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(tkn$nhd_long, tkn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(tn$nhd_long, tn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(tkntn$nhd_long, tkntn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+dev.off()
+
+##inorgs and totals map
+pdf("Figures/TotalandInorgMap.pdf", width=13, height=8)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = TRUE, col="white", fg="grey30", lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(nh4tkn$nhd_long, nh4tkn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(nh4tn$nhd_long, nh4tn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(no3tkn$nhd_long, no3tkn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(no3tn$nhd_long, no3tn$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+points(triplequad$nhd_long, triplequad$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+dev.off()
+
+##3-4 vars map
+pdf("Figures/34varsMap.pdf", width=13, height=8)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = TRUE, col="white", fg="grey30", lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(triplequad$nhd_long, triplequad$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+dev.off()
 
 text(-78, 47, "N Species", cex=1.5)
 
@@ -100,9 +142,17 @@ analysis<-data.frame(lakeid)
 names(analysis)<-"lagoslakeid"
 
 a.data<-merge(analysis, ncords, by="lagoslakeid", all.x=T, all.y=F)
-points(a.data$nhd_long, a.data$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(255, 255, 204, 150, max=255), cex=0.7)
+pdf("Figures/ModelLakes.pdf", width=13, height=8)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = TRUE, col="white", fg="grey30", lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(a.data$nhd_long, a.data$nhd_lat, pch=21, col="black", lwd=.5, bg=rgb(150, 150, 150, 150, max=255), cex=1.5)
+dev.off()
 
-
-programs<-lagos$epi_nutr[,c(2:4)]
+programs<-lagos$epi.nutr[,c(2:4)]
 
 a.dat.prog<-merge(a.data, programs, by="lagoslakeid", all.x=T, all.y=F)
+
+
+

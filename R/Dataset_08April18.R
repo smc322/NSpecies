@@ -11,13 +11,17 @@ lagos<-lagos_load(version="1.087.1")
 
 locus<-lagos$locus
 # laptop version use 
-#epinut<-lagos$epi.nutr
+epinut<-lagos$epi.nutr
 #desktop use
-epinut<-lagos$epi_nutr
+#epinut<-lagos$epi_nutr
 
-data.tn<-lagos$epi_nutr[,c(2,12,14,19, 63, 65, 71 ,92,93)]
+#data.tn<-lagos$epi_nutr[,c(2,12,14,19, 63, 65, 71 ,92,93)]
+#laptop
+data.tn<-lagos$epi.nutr[,c(2,12,14,19, 63, 65, 71 ,92,93)]
 
 data.tkn<-lagos$epi_nutr[,c(2,12,14,18, 63, 65, 70 ,92,93)]
+#laptop
+data.tkn<-lagos$epi.nutr[,c(2,12,14,18, 63, 65, 70 ,92,93)]
 
 tn.complete<-data.tn[!with(data.tn, is.na(nh4)|is.na(no2no3)|is.na(tn)),]
 tn.complete$tkn=NA
@@ -59,7 +63,9 @@ iws.lulc.rel.keep.nona<-na.omit(iws.lulc.rel.keep)
 
 area<-locus[,c(1,6)]
 wsarea<-lagos$iws[,c(2,12)]
-maxd<-lagos$lakes_limno[,c(1,6)]
+#maxd<-lagos$lakes_limno[,c(1,6)]
+#laptop
+maxd<-lagos$lake.specific[,c(1,6)]
 connclass<-lagos$lakes.geo[,c(1,31)]
 
 lakewsa<-merge(area, wsarea, by="lagoslakeid", all.x=T, all.y=T)
@@ -90,6 +96,5 @@ ll.l<-lagos$locus[,c(1,4,5)]
 data.n.geo.ll<-merge(data.n.geo, ll.l, by="lagoslakeid", all.x=T, all.y=F)
 setwd("~/Dropbox/Sarah_Work/Manuscripts/2018_NSpecies/Data")
 write.csv(data.n.geo.ll, file="LagosNSpeciesData_latlong_04June2018.csv")
-
 
 
