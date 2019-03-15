@@ -186,3 +186,50 @@ points(rc.d.ll$nhd_long, rc.d.ll$nhd_lat, bg = get.col.bins.ld(rc.d.ll$maxdepth,
 text(x=-79.5, y = 48.55, "Lake Depth (m)")
 
 dev.off()
+
+
+#want to remake fig 1 with all lakes not just with analysis lakes
+data.n<-epinut[,c("lagoslakeid", "tn", "tkn", "no2no3", "sampleyear", "samplemonth")]
+
+data.n$tn_calc<- data.n$tkn + data.n$no2no3
+data.n$tn_all = data.n$tn
+data.n$tn_all[which(is.na(data.n$tn_all))] = data.n$tn_calc[which(is.na(data.n$tn_all))]
+
+data.n.80<-data.n[data.n$sampleyear>1979,]
+data.n.80.jas<-data.n.80[data.n.80$samplemonth == 7 | data.n.80$samplemonth == 8 | data.n.80$samplemonth == 9,]
+
+nkeeps<-na.omit(data.n.80.jas[,c("lagoslakeid", "tn_all", "sampleyear")])
+
+nlymed<- nkeeps %>% group_by(lagoslakeid, sampleyear) %>% summarise(ly.med=median(tn_all))
+lakemed<- nlymed %>% group_by(lagoslakeid) %>% summarise(l.med=median(ly.med))
+
+tndir<-na.omit(data.n[,c("lagoslakeid", "tn")])
+dirlakes<-unique(tndir$lagoslakeid)
+
+lakemed.dir<-lakemed[lakemed$lagoslakeid %in% dirlakes, ]
+lakemed.calc<-lakemed[!lakemed$lagoslakeid %in% dirlakes,]
+
+lakemed.dir$dattype<-1
+lakemed.calc$dattype<-2
+
+lakemed.all<-rbind(lakemed.dir, lakemed.calc)
+names(lakemed.all)<-c("lagoslakeid", "tn", "dattype")
+lakesallmap<-merge(lakemed.all, ll.l, by="lagoslakeid", all.x=T, all.y=F)
+
+pdf("Figures/MAPS_AOASFigs/Fig1_TNmap_alllakes.pdf",width = 10,height = 6)
+map(database = "state", regions=c("Minnesota", "Wisconsin", "Iowa", "Illinois","Missouri",
+                                  "Indiana","Michigan","Ohio", "Pennsylvania","New York",
+                                  "New Jersey", "Connecticut","Rhode Island","Massachusetts",
+                                  "Vermont", "New Hampshire","Maine"), fill = FALSE, col="grey30",lwd=1,mar=c(0,0,1,0),oma=c(0,0,0,0))
+points(lakesallmap$nhd_long, lakesallmap$nhd_lat, bg = get.col.bins.tn(lakesallmap$tn, 200), pch = c(21, 23)[lakesallmap$dattype], col = "black" ,lwd = .5, cex=1)
+
+points(x = seq(from = -82, to =-77, by = (5/6)), y= rep(48,7), pch = 22, cex = 4, bg = colors, col="grey30")
+text(x = seq(from = -82, to = -77, by = (5/6)), y = rep(47.55,7), labels=c("331", "477", "656", "842", "1153", "1957", ">1957"), cex = .6)
+text(x=-79.5, y = 48.55, labels = expression(paste("Median TN (",mu,"g/L)")))
+
+points(x=-81, y=46.6, pch=21, cex=2)
+text(-80.8, 46.56, "TN Measured", pos=4)
+points(x=-81, y=46, pch=23, cex=2)
+text(-80.8, 45.96, "TN Calculated", pos=4)
+#text(-97, 49.5, "(A) TP", adj=c(0,0), cex=1.25)
+dev.off()
